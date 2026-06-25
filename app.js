@@ -9,7 +9,8 @@ import {
 import {
   fbSetView, fbSetKey, fbSetPentaKey, fbSetNumMode,
   fbRender, fbToggleBlues, fbToggleNoteNames, fbToggleSevenths,
-  fbBuildPills, fbBuildShapePills, fbBuildChordPills
+  fbBuildPills, fbBuildShapePills, fbBuildChordPills, fbBuildDimPills,
+  fbBuildHarmPills, fbBuildHungPills
 } from './js/scale-map.js';
 import { cikSetMode, cikToggleSevenths, cikBuildRootBtns, cikBuild } from './js/chords-in-key.js';
 import {
@@ -49,6 +50,9 @@ nnRenderFretboard();
 fbBuildPills();
 fbBuildShapePills();
 fbBuildChordPills();
+fbBuildDimPills();
+fbBuildHarmPills();
+fbBuildHungPills();
 fbRender();
 cikBuildRootBtns();
 cikBuild();

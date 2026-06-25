@@ -68,6 +68,9 @@ let fbBlues = false;    // blues scale toggle (adds D#/Eb, pc=3)
 let fbPentaShape = null; // currently selected pentatonic shape name, or null
 let fbShowSevenths = false;   // whether to add diatonic 7ths to active chords
 let fbShowNoteNames = false;  // global toggle: show note names instead of interval numbers on all dots
+let fbDimType = 'half-whole'; // 'half-whole' | 'whole-half'
+let fbHarmonicShape = null;   // currently selected harmonic minor shape, or null
+let fbHungarianShape = null;  // currently selected Hungarian minor shape, or null
 
 // pc → display label when note-name mode is on
 // Enharmonic notes show both names separated by /
@@ -76,6 +79,62 @@ const FB_PC_NAMES = {
   5:'F', 6:'F♯/G♭', 7:'G', 8:'G♯/A♭', 9:'A',
   10:'A♯/B♭', 11:'B'
 };
+
+// Diminished scale definitions (rooted on C)
+const FB_DIM_SCALES = {
+  'half-whole': {
+    name: 'Half-Whole',
+    pcs: new Set([0, 1, 3, 4, 6, 7, 9, 10]),
+    labels: { 0:'1', 1:'♭2', 3:'♭3', 4:'3', 6:'♯4', 7:'5', 9:'6', 10:'♭7' },
+    rootPc: 0,
+    notes: 'C · D♭ · E♭ · E · F♯ · G · A · B♭',
+  },
+  'whole-half': {
+    name: 'Whole-Half',
+    pcs: new Set([0, 2, 3, 5, 6, 8, 9, 11]),
+    labels: { 0:'1', 2:'2', 3:'♭3', 5:'4', 6:'♭5', 8:'♭6', 9:'6', 11:'7' },
+    rootPc: 0,
+    notes: 'C · D · E♭ · F · G♭ · A♭ · A · B',
+  },
+};
+
+// A Harmonic Minor: A B C D E F G# — pcs: 9,11,0,2,4,5,8
+const FB_HARM_PCS = new Set([9, 11, 0, 2, 4, 5, 8]);
+const FB_HARM_ROOT = 9;
+const FB_HARM_LABELS = { 9:'1', 11:'2', 0:'♭3', 2:'4', 4:'5', 5:'♭6', 8:'7' };
+const FB_HARM_SHAPES = [
+  { name: 'Position 1', fill: '#7F77DD', stroke: '#534AB7', text: '#fff',
+    dots: { 0:[0,1,4], 1:[0,2,3], 2:[0,2,3], 3:[1,2,4], 4:[0,1,3], 5:[0,1,4] } },
+  { name: 'Position 2', fill: '#C8822A', stroke: '#8F5510', text: '#fff',
+    dots: { 0:[4,5,7], 1:[3,5,7], 2:[3,6,7], 3:[4,5,7], 4:[3,5,6], 5:[4,5,7] } },
+  { name: 'Position 3', fill: '#1D9E75', stroke: '#0F6E56', text: '#fff',
+    dots: { 0:[5,7,8], 1:[5,7,8], 2:[6,7,9], 3:[5,7,9], 4:[5,6,9], 5:[5,7,8] } },
+  { name: 'Position 4', fill: '#D85A30', stroke: '#993C1D', text: '#fff',
+    dots: { 0:[7,8,10], 1:[7,8,11], 2:[7,9,10], 3:[7,9,10], 4:[9,10,12], 5:[7,8,10] } },
+  { name: 'Position 5', fill: '#D4537E', stroke: '#993556', text: '#fff',
+    dots: { 0:[10,12,13], 1:[11,12,14], 2:[10,12,14], 3:[10,13,14], 4:[10,12,13], 5:[10,12,13] } },
+];
+
+// A Hungarian Minor: A B C D# E F G# — pcs: 9,11,0,3,4,5,8
+const FB_HUNG_PCS = new Set([9, 11, 0, 3, 4, 5, 8]);
+const FB_HUNG_ROOT = 9;
+const FB_HUNG_LABELS = { 9:'1', 11:'2', 0:'♭3', 3:'♯4', 4:'5', 5:'♭6', 8:'7' };
+const FB_HUNG_SHAPES = [
+  { name: 'Position 1', fill: '#C8822A', stroke: '#8F5510', text: '#fff',
+    dots: { 0:[5,7,8], 1:[6,7,8], 2:[6,7,9], 3:[5,8,9], 4:[5,6,9], 5:[5,7,8] } },
+  { name: 'Position 2', fill: '#1D9E75', stroke: '#0F6E56', text: '#fff',
+    dots: { 0:[7,8,11], 1:[7,8,11], 2:[7,9,10], 3:[8,9,10], 4:[9,10,12], 5:[8,11,12] } },
+  { name: 'Position 3', fill: '#D85A30', stroke: '#993C1D', text: '#fff',
+    dots: { 0:[8,11,12], 1:[8,11,12], 2:[9,10,13], 3:[9,10,13], 4:[10,12,13], 5:[11,12,13] } },
+  { name: 'Position 4', fill: '#7F77DD', stroke: '#534AB7', text: '#fff',
+    dots: { 0:[11,12,13], 1:[11,12,14], 2:[10,13,14], 3:[10,13,14], 4:[12,13], 5:[11,12,13] } },
+  { name: 'Position 5', fill: '#D4537E', stroke: '#993556', text: '#fff',
+    dots: { 0:[0,1,4], 1:[0,2,3], 2:[1,2,3], 3:[1,2,4], 4:[1,4,5], 5:[1,4,5] } },
+  { name: 'Position 6', fill: '#2A7E9E', stroke: '#185870', text: '#fff',
+    dots: { 0:[1,4,5], 1:[2,3,6], 2:[2,3,6], 3:[2,4,5], 4:[4,5,6], 5:[4,5,7] } },
+  { name: 'Position 7', fill: '#A03080', stroke: '#701858', text: '#fff',
+    dots: { 0:[4,5,7], 1:[3,6,7], 2:[3,6,7], 3:[4,5,8], 4:[5,6,9], 5:[5,7,8] } },
+];
 
 // Diatonic chords of C major — pitch-classes and interval labels per note
 // pcs/intervals = triad tones; pc7/int7 = the diatonic 7th added on top
@@ -295,6 +354,63 @@ function fbNoteLabel(p, intervalLabel){
   if(!fbShowNoteNames) return { text: intervalLabel, small: intervalLabel.length > 1 };
   const name = FB_PC_NAMES[p] ?? intervalLabel;
   return { text: name, small: name.length > 2 };
+}
+
+// Generic renderer for scale views with optional shape highlights (harmonic, Hungarian)
+function fbRenderScaleView(pcsSet, labels, rootPc, shapes, selectedShape){
+  const svg = document.getElementById('fb-svg');
+  FB_STRINGS.forEach((s, i) => {
+    for(let f=0; f<=FB_FRETS; f++){
+      const p = fbPc(s.midi + f);
+      if(!pcsSet.has(p)) continue;
+      const cx = FB_LEFT + FB_NUT + (f-.5)*FB_FW;
+      const cy = fbStrY(i);
+      const isRoot = p === rootPc;
+      const label = labels[p] || '';
+      const sw = isRoot ? 2.5 : 1.5;
+      svg.appendChild(fbEl('circle',{cx, cy, r:FB_R, fill:'#111111', stroke:'#cccccc', 'stroke-width':sw}));
+      if(isRoot){
+        svg.appendChild(fbEl('circle',{cx, cy, r:FB_R+4, fill:'none',
+          stroke:'#888', 'stroke-width':'1.2', 'stroke-dasharray':'3 2', opacity:.3}));
+      }
+      if(label){
+        const nl = fbNoteLabel(p, label);
+        const lt = fbEl('text',{x:cx, y:cy, 'text-anchor':'middle', 'dominant-baseline':'central',
+          fill:'#e0e0e0', 'font-size': nl.small ? '7' : '11',
+          'font-weight': isRoot ? '700' : '500',
+          'font-family':'Inter,sans-serif'});
+        lt.textContent = nl.text;
+        svg.appendChild(lt);
+      }
+    }
+  });
+  if(selectedShape){
+    Object.entries(selectedShape.dots).forEach(([siStr, frets]) => {
+      const si = parseInt(siStr);
+      const s = FB_STRINGS[si];
+      frets.forEach(f => {
+        const cx = FB_LEFT + FB_NUT + (f-.5)*FB_FW;
+        const cy = fbStrY(si);
+        svg.appendChild(fbEl('circle',{cx, cy, r:FB_R, fill:selectedShape.fill, stroke:selectedShape.stroke, 'stroke-width':'2'}));
+        const p = fbPc(s.midi + f);
+        const isRoot = p === rootPc;
+        if(isRoot){
+          svg.appendChild(fbEl('circle',{cx, cy, r:FB_R+4, fill:'none',
+            stroke:selectedShape.stroke, 'stroke-width':'1.5', 'stroke-dasharray':'3 2', opacity:.6}));
+        }
+        const label = labels[p] || '';
+        if(label){
+          const nl = fbNoteLabel(p, label);
+          const lt = fbEl('text',{x:cx, y:cy, 'text-anchor':'middle', 'dominant-baseline':'central',
+            fill:selectedShape.text, 'font-size': nl.small ? '7' : '11',
+            'font-weight': isRoot ? '700' : '600',
+            'font-family':'Inter,sans-serif'});
+          lt.textContent = nl.text;
+          svg.appendChild(lt);
+        }
+      });
+    });
+  }
 }
 
 function fbPc(m){ return ((m%12)+12)%12; }
@@ -606,6 +722,46 @@ function fbRender(){
     return;
   }
 
+  if(fbView === 'diminished'){
+    const scale = FB_DIM_SCALES[fbDimType || 'half-whole'];
+    FB_STRINGS.forEach((s, i) => {
+      for(let f=0; f<=FB_FRETS; f++){
+        const p = fbPc(s.midi + f);
+        if(!scale.pcs.has(p)) continue;
+        const cx = FB_LEFT + FB_NUT + (f-.5)*FB_FW;
+        const cy = fbStrY(i);
+        const isRoot = p === scale.rootPc;
+        const label = scale.labels[p] || '';
+        const sw = isRoot ? 2.5 : 1.5;
+        svg.appendChild(fbEl('circle',{cx, cy, r:FB_R, fill:'#111111', stroke:'#cccccc', 'stroke-width':sw}));
+        if(isRoot){
+          svg.appendChild(fbEl('circle',{cx, cy, r:FB_R+4, fill:'none',
+            stroke:'#888', 'stroke-width':'1.2', 'stroke-dasharray':'3 2', opacity:.3}));
+        }
+        if(label){
+          const nl = fbNoteLabel(p, label);
+          const lt = fbEl('text',{x:cx, y:cy, 'text-anchor':'middle', 'dominant-baseline':'central',
+            fill:'#e0e0e0', 'font-size': nl.small ? '7' : '11',
+            'font-weight': isRoot ? '700' : '500',
+            'font-family':'Inter,sans-serif'});
+          lt.textContent = nl.text;
+          svg.appendChild(lt);
+        }
+      }
+    });
+    return;
+  }
+
+  if(fbView === 'harmonic'){
+    fbRenderScaleView(FB_HARM_PCS, FB_HARM_LABELS, FB_HARM_ROOT, FB_HARM_SHAPES, fbHarmonicShape);
+    return;
+  }
+
+  if(fbView === 'hungarian'){
+    fbRenderScaleView(FB_HUNG_PCS, FB_HUNG_LABELS, FB_HUNG_ROOT, FB_HUNG_SHAPES, fbHungarianShape);
+    return;
+  }
+
   // ── Modes dots ────────────────────────────────────────────────────────────
   const degMap  = fbCurrentKey==='C' ? FB_C_DEGS : FB_A_DEGS;
   const tonicPc = fbCurrentKey==='C' ? 0 : 9;
@@ -700,20 +856,20 @@ function fbRender(){
 
 function fbSetView(v){
   fbView = v;
-  document.getElementById('fb-view-modes').classList.toggle('active', v==='modes');
-  document.getElementById('fb-view-pentatonic').classList.toggle('active', v==='pentatonic');
-  document.getElementById('fb-view-chords').classList.toggle('active', v==='chords');
+  ['modes','pentatonic','diminished','harmonic','hungarian','chords'].forEach(id => {
+    document.getElementById('fb-view-'+id).classList.toggle('active', v===id);
+  });
   document.getElementById('fb-modes-base').style.display       = v==='modes'      ? '' : 'none';
   document.getElementById('fb-penta-base').style.display       = v==='pentatonic' ? '' : 'none';
   document.getElementById('fb-pill-row').style.display         = v==='modes'      ? '' : 'none';
   document.getElementById('fb-shape-pill-row').style.display   = v==='pentatonic' ? '' : 'none';
+  document.getElementById('fb-dim-pill-row').style.display     = v==='diminished' ? '' : 'none';
+  document.getElementById('fb-harm-pill-row').style.display    = v==='harmonic'   ? '' : 'none';
+  document.getElementById('fb-hung-pill-row').style.display    = v==='hungarian'  ? '' : 'none';
   document.getElementById('fb-chord-pill-row').style.display   = v==='chords'     ? '' : 'none';
-  if(v==='pentatonic' || v==='chords') document.getElementById('fb-num-ctrl').style.display = 'none';
-  if(v==='chords'){
-    document.getElementById('fb-blues-row').style.display = 'none';
-  } else {
-    document.getElementById('fb-blues-row').style.display = '';
-  }
+  if(v!=='modes') document.getElementById('fb-num-ctrl').style.display = 'none';
+  const showBlues = (v==='modes' || v==='pentatonic');
+  document.getElementById('fb-blues-row').style.display = showBlues ? '' : 'none';
   fbUpdateKeyLabel(); fbUpdateBluesLabel();
   fbRender();
 }
@@ -804,6 +960,73 @@ function fbBuildChordPills(){
 }
 
 
+function fbBuildDimPills(){
+  const c = document.getElementById('fb-dim-pills');
+  c.innerHTML = '';
+  ['half-whole','whole-half'].forEach(key => {
+    const scale = FB_DIM_SCALES[key];
+    const pill = document.createElement('div');
+    pill.className = 'fb-mode-pill';
+    pill.id = 'fb-dim-pill-' + key;
+    pill.style.cssText = key === fbDimType
+      ? 'border-color:#777;color:#f0f0f0;background:#2a2a2a;'
+      : 'border-color:#555;color:#ccc;background:#222;';
+    pill.innerHTML = '<span>' + scale.name + '</span>';
+    pill.onclick = () => {
+      fbDimType = key;
+      document.querySelectorAll('#fb-dim-pills .fb-mode-pill').forEach(p => {
+        p.style.cssText = 'border-color:#555;color:#ccc;background:#222;';
+      });
+      pill.style.cssText = 'border-color:#777;color:#f0f0f0;background:#2a2a2a;';
+      fbUpdateKeyLabel();
+      fbRender();
+    };
+    c.appendChild(pill);
+  });
+}
+
+function fbBuildScaleShapePills(containerId, shapes, stateGetter, stateSetter){
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  const none = document.createElement('div');
+  none.className = 'fb-mode-pill';
+  none.style.cssText = 'border-color:#777;color:#f0f0f0;background:#2a2a2a;';
+  none.innerHTML = '<span>None</span>';
+  none.onclick = () => {
+    stateSetter(null);
+    c.querySelectorAll('.fb-mode-pill').forEach(p => p.classList.remove('selected'));
+    none.classList.add('selected');
+    fbRender();
+  };
+  none.classList.add('selected');
+  c.appendChild(none);
+  shapes.forEach(shape => {
+    const pill = document.createElement('div');
+    pill.className = 'fb-mode-pill';
+    pill.style.cssText = `border-color:${shape.stroke};color:${shape.text};background:${shape.fill};`;
+    pill.innerHTML = `<span>${shape.name}</span>`;
+    pill.onclick = () => {
+      const cur = stateGetter();
+      stateSetter(cur === shape ? null : shape);
+      c.querySelectorAll('.fb-mode-pill').forEach(p => p.classList.remove('selected'));
+      if(stateGetter()) pill.classList.add('selected');
+      else none.classList.add('selected');
+      fbRender();
+    };
+    c.appendChild(pill);
+  });
+}
+
+function fbBuildHarmPills(){
+  fbBuildScaleShapePills('fb-harm-pills', FB_HARM_SHAPES,
+    () => fbHarmonicShape, v => { fbHarmonicShape = v; });
+}
+
+function fbBuildHungPills(){
+  fbBuildScaleShapePills('fb-hung-pills', FB_HUNG_SHAPES,
+    () => fbHungarianShape, v => { fbHungarianShape = v; });
+}
+
 function fbBuildPills(){
   const c = document.getElementById('fb-mode-pills');
   c.innerHTML = '';
@@ -884,6 +1107,19 @@ const FB_MODE_NOTES = {
 
 function fbUpdateKeyLabel(){
   const el = document.getElementById('fb-key-label');
+  if(fbView === 'diminished'){
+    const scale = FB_DIM_SCALES[fbDimType || 'half-whole'];
+    el.innerHTML = `<strong>C ${scale.name} Diminished</strong> — ${scale.notes}`;
+    return;
+  }
+  if(fbView === 'harmonic'){
+    el.innerHTML = '<strong>A Harmonic Minor</strong> — A · B · C · D · E · F · G♯ — degrees relative to A (1 · 2 · ♭3 · 4 · 5 · ♭6 · 7)';
+    return;
+  }
+  if(fbView === 'hungarian'){
+    el.innerHTML = '<strong>A Hungarian Minor</strong> — A · B · C · D♯ · E · F · G♯ — degrees relative to A (1 · 2 · ♭3 · ♯4 · 5 · ♭6 · 7)';
+    return;
+  }
   if(fbView === 'chords'){
     if(fbActiveChords.size === 0){
       el.innerHTML = '<strong>C major diatonic chords</strong> — select a chord below to highlight its tones';
@@ -935,4 +1171,5 @@ function fbSetKey(k, doRender=true){
 
 export { fbSetView, fbSetKey, fbSetPentaKey, fbSetNumMode, fbRender };
 export { fbToggleBlues, fbToggleNoteNames, fbToggleSevenths };
-export { fbBuildPills, fbBuildShapePills, fbBuildChordPills };
+export { fbBuildPills, fbBuildShapePills, fbBuildChordPills, fbBuildDimPills };
+export { fbBuildHarmPills, fbBuildHungPills };

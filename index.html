@@ -273,6 +273,9 @@
             <div class="fb-toggle-row">
               <button class="fb-tog-btn active" id="fb-view-modes"      onclick="fbSetView('modes')">Modes</button>
               <button class="fb-tog-btn"        id="fb-view-pentatonic" onclick="fbSetView('pentatonic')">Pentatonic</button>
+              <button class="fb-tog-btn"        id="fb-view-diminished" onclick="fbSetView('diminished')">Diminished</button>
+              <button class="fb-tog-btn"        id="fb-view-harmonic"   onclick="fbSetView('harmonic')">Harmonic</button>
+              <button class="fb-tog-btn"        id="fb-view-hungarian"  onclick="fbSetView('hungarian')">Hungarian</button>
               <button class="fb-tog-btn"        id="fb-view-chords"     onclick="fbSetView('chords')">Chords</button>
             </div>
           </div>
@@ -312,7 +315,22 @@
           <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Highlight shape</div>
           <div class="fb-mode-pills" id="fb-shape-pills"></div>
         </div>
-        <!-- Row 2c: Diatonic chord pills (chords view only) -->
+        <!-- Row 2c: Diminished scale pills (diminished view only) -->
+        <div id="fb-dim-pill-row" class="fb-pill-row" style="display:none;">
+          <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Diminished scale</div>
+          <div class="fb-mode-pills" id="fb-dim-pills"></div>
+        </div>
+        <!-- Row 2d: Harmonic minor position pills -->
+        <div id="fb-harm-pill-row" class="fb-pill-row" style="display:none;">
+          <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Highlight position</div>
+          <div class="fb-mode-pills" id="fb-harm-pills"></div>
+        </div>
+        <!-- Row 2e: Hungarian minor position pills -->
+        <div id="fb-hung-pill-row" class="fb-pill-row" style="display:none;">
+          <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Highlight position</div>
+          <div class="fb-mode-pills" id="fb-hung-pills"></div>
+        </div>
+        <!-- Row 2f: Diatonic chord pills (chords view only) -->
         <div id="fb-chord-pill-row" class="fb-pill-row" style="display:none;">
           <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:6px;">
             <div class="fb-ctrl-label" style="margin-bottom:0;">Highlight chord — select one or more</div>
