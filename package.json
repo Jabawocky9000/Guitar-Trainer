@@ -1,0 +1,9 @@
+{
+  "name": "guitar-theory-trainer",
+  "version": "1.0.0",
+  "description": "Guitar theory training web app",
+  "private": true,
+  "scripts": {
+    "start": "node .claude/server.js"
+  }
+}
