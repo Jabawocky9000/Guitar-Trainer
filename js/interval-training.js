@@ -178,6 +178,7 @@ function itCheck(){
     inp.style.color       = 'var(--green-text)';
     fb.textContent = '✓ Correct!';
     fb.className   = 'feedback good';
+    setTimeout(itNext, 1000);
   } else {
     itStreak = 0;
     inp.style.borderColor = 'var(--red-border)';

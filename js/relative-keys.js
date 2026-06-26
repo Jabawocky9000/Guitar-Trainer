@@ -27,6 +27,7 @@ function answerRel(chosen,btn,correct){
   updateRelStats();
   document.getElementById('r-prog').style.width='100%';
   document.getElementById('r-next').style.display='block';
+  if(chosen===correct) setTimeout(nextRelKey, 1000);
 }
 
 export function nextRelKey(){

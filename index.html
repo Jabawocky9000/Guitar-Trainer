@@ -12,10 +12,14 @@
 <body>
 
 <header class="app-header">
+  <button class="burger-btn" id="burger-btn" onclick="toggleMobileNav()">
+    <span></span><span></span><span></span>
+  </button>
   <div class="logo-mark">🎸</div>
   <span class="app-title">Guitar Theory Trainer</span>
   <span class="app-sub">For professional practice</span>
 </header>
+<div class="nav-overlay" id="nav-overlay" onclick="toggleMobileNav()"></div>
 
 <div class="layout">
   <nav class="sidebar">
@@ -349,7 +353,7 @@
           <div class="fb-mode-pills" id="fb-chord-pills"></div>
         </div>
 
-        <!-- Blues scale + Note names toggles -->
+        <!-- Blues scale toggle (modes + pentatonic only) -->
         <div id="fb-blues-row" class="fb-controls" style="margin-bottom:0.75rem;gap:20px;">
           <div class="fb-ctrl" style="flex-direction:row;align-items:center;gap:10px;">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
@@ -365,7 +369,9 @@
               <span id="fb-blues-label" style="font-size:11px;color:var(--text-dim);font-family:var(--mono);"></span>
             </label>
           </div>
-          <!-- Note names toggle -->
+        </div>
+        <!-- Note names toggle (all views) -->
+        <div id="fb-notenames-row" class="fb-controls" style="margin-bottom:0.75rem;gap:20px;">
           <div class="fb-ctrl" style="flex-direction:row;align-items:center;gap:10px;">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
               <div id="fb-notenames-toggle" onclick="fbToggleNoteNames()" style="
@@ -383,6 +389,8 @@
 
         <div class="fb-key-label" id="fb-key-label"><strong>C major</strong> — intervals relative to C</div>
         <div class="fb-scroll"><svg id="fb-svg" role="img"><title>Scale Map</title></svg></div>
+        <!-- Diatonic chords panel (populated by JS) -->
+        <div id="fb-diatonic-panel" style="margin-top:1rem;"></div>
       </div>
     </div>
 

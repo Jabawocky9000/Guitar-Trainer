@@ -58,7 +58,7 @@ function checkNotes(){
   });
   const fb=document.getElementById('note-fb');
   if(!filled){fb.textContent='Enter some notes first.';fb.className='feedback';return;}
-  if(ok===STRINGS.length){fb.textContent=`✓ All ${STRINGS.length} correct!`;fb.className='feedback good';}
+  if(ok===STRINGS.length){fb.textContent=`✓ All ${STRINGS.length} correct!`;fb.className='feedback good';setTimeout(nextRandomFret,1000);}
   else{fb.textContent=`${ok}/${filled} correct`;fb.className='feedback bad';}
 }
 
@@ -269,6 +269,7 @@ function ssCheck(){
     inp.style.color       = 'var(--green-text)';
     fb.textContent = '✓ Correct!';
     fb.className   = 'feedback good';
+    setTimeout(ssNext, 1000);
   } else {
     inp.style.borderColor = 'var(--red-border)';
     inp.style.background  = 'var(--red-bg)';
@@ -276,7 +277,6 @@ function ssCheck(){
     const enhs = getEnharmonics(s.midi, ssCurrentFret);
     fb.textContent = `✗  ${enhs.join(' / ')}`;
     fb.className   = 'feedback bad';
-    // Redraw fretboard with the answer dot revealed
     ssRenderFretboard(true);
   }
 }

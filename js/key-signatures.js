@@ -50,6 +50,7 @@ function ksCheckAccidentals() {
   else{document.getElementById('ks-acc-fb').textContent=`Order: ${correct.join(' → ')}`;document.getElementById('ks-acc-fb').className='feedback bad';}
   document.getElementById('ks-prog').style.width='100%';
   document.getElementById('ks-next').style.display='block';
+  if(ok) setTimeout(nextKsKey, 1000);
 }
 
 function ksAnswerCount(n, btn) {
@@ -62,7 +63,7 @@ function ksAnswerCount(n, btn) {
     document.getElementById('ks-fb').className='feedback good';
     ksScore++; ksStreak++;
     document.getElementById('ks-prog').style.width='50%';
-    if(ksCurrent.count===0){document.getElementById('ks-next').style.display='block';document.getElementById('ks-prog').style.width='100%';}
+    if(ksCurrent.count===0){document.getElementById('ks-next').style.display='block';document.getElementById('ks-prog').style.width='100%';setTimeout(nextKsKey,1000);}
     else setTimeout(ksShowAccidentals,600);
   } else {
     btn.classList.add('wrong');

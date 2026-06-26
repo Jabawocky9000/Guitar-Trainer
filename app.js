@@ -10,7 +10,7 @@ import {
   fbSetView, fbSetKey, fbSetPentaKey, fbSetNumMode,
   fbRender, fbToggleBlues, fbToggleNoteNames, fbToggleSevenths,
   fbBuildPills, fbBuildShapePills, fbBuildChordPills, fbBuildDimPills,
-  fbBuildHarmPills, fbBuildHungPills
+  fbBuildHarmPills, fbBuildHungPills, fbRenderDiatonicPanel
 } from './js/scale-map.js';
 import { cikSetMode, cikToggleSevenths, cikBuildRootBtns, cikBuild } from './js/chords-in-key.js';
 import {
@@ -27,11 +27,24 @@ function gotoSection(id) {
     if (b.getAttribute('onclick').includes(id)) b.classList.add('active');
   });
   if (id === 'interval-training') initIntervalTraining();
+  closeMobileNav();
+}
+
+function toggleMobileNav() {
+  document.querySelector('.sidebar').classList.toggle('open');
+  document.getElementById('nav-overlay').classList.toggle('open');
+  document.getElementById('burger-btn').classList.toggle('open');
+}
+
+function closeMobileNav() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('nav-overlay').classList.remove('open');
+  document.getElementById('burger-btn').classList.remove('open');
 }
 
 // Expose functions to HTML onclick handlers
 Object.assign(window, {
-  gotoSection, setKsMode, nextKsKey, setRelMode, nextRelKey,
+  gotoSection, toggleMobileNav, setKsMode, nextKsKey, setRelMode, nextRelKey,
   nextRandomFret, checkNotes, revealNotes, clearNotes,
   nnToggleDots, nnSetMode, ssCheck, ssReveal, ssNext,
   ssToggleDots, ssToggleRefFretboard, nnToggleFretboard,
@@ -54,5 +67,6 @@ fbBuildDimPills();
 fbBuildHarmPills();
 fbBuildHungPills();
 fbRender();
+fbRenderDiatonicPanel();
 cikBuildRootBtns();
 cikBuild();
