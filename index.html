@@ -266,79 +266,104 @@
     <div id="fretboard" class="section">
       <div class="section-header">
         <h1>Scale Map</h1>
-        <p>C major modes across the neck. Select a mode to highlight its pattern and see intervals from its own root.</p>
+        <p>Visualise scales and modes across the neck. Select a key, view, and highlight patterns.</p>
       </div>
       <div class="card" style="padding:1.5rem; max-width:none;">
 
-        <!-- Row 1: View toggle + Base numbers (mode-context aware) -->
-        <div class="fb-top-row">
+        <!-- Row 1: View dropdown + Key dropdown + Relative toggle + right-aligned toggles -->
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:12px;">
           <div class="fb-ctrl">
             <div class="fb-ctrl-label">View</div>
-            <div class="fb-toggle-row">
-              <button class="fb-tog-btn active" id="fb-view-modes"      onclick="fbSetView('modes')">Modes</button>
-              <button class="fb-tog-btn"        id="fb-view-pentatonic" onclick="fbSetView('pentatonic')">Pentatonic</button>
-              <button class="fb-tog-btn"        id="fb-view-diminished" onclick="fbSetView('diminished')">Diminished</button>
-              <button class="fb-tog-btn"        id="fb-view-harmonic"   onclick="fbSetView('harmonic')">Harmonic</button>
-              <button class="fb-tog-btn"        id="fb-view-hungarian"  onclick="fbSetView('hungarian')">Hungarian</button>
-              <button class="fb-tog-btn"        id="fb-view-chords"     onclick="fbSetView('chords')">Chords</button>
-            </div>
+            <select class="fb-select" id="fb-view-select" onchange="fbSetView(this.value)">
+              <option value="modes">Modes</option>
+              <option value="pentatonic">Pentatonic</option>
+              <option value="diminished">Diminished</option>
+              <option value="harmonic">Harmonic Minor</option>
+              <option value="hungarian">Hungarian Minor</option>
+              <option value="chords">Chord Tones</option>
+            </select>
           </div>
-          <!-- Base numbers for Modes view -->
-          <div id="fb-modes-base" class="fb-ctrl">
+          <div class="fb-ctrl">
+            <div class="fb-ctrl-label">Key</div>
+            <select class="fb-select" id="fb-key-select" onchange="fbSetKeyRoot(parseInt(this.value))" style="min-width:150px;">
+              <option value="0">C / Am</option>
+              <option value="7">G / Em</option>
+              <option value="2">D / Bm</option>
+              <option value="9">A / F♯m</option>
+              <option value="4">E / C♯m</option>
+              <option value="11">B / G♯m</option>
+              <option value="6">F♯ / D♯m</option>
+              <option value="1">D♭ / B♭m</option>
+              <option value="5">F / Dm</option>
+              <option value="10">B♭ / Gm</option>
+              <option value="3">E♭ / Cm</option>
+              <option value="8">A♭ / Fm</option>
+            </select>
+          </div>
+          <div class="fb-ctrl" id="fb-rel-ctrl">
             <div class="fb-ctrl-label">Relative Major/Minor</div>
             <div class="fb-toggle-row">
-              <button class="fb-tog-btn active" id="fb-btn-c" onclick="fbSetKey('C')">C major</button>
-              <button class="fb-tog-btn"        id="fb-btn-a" onclick="fbSetKey('A')">A minor</button>
+              <button class="fb-tog-btn active" id="fb-btn-major" onclick="fbSetRelMode('major')">C major</button>
+              <button class="fb-tog-btn"        id="fb-btn-minor" onclick="fbSetRelMode('minor')">A minor</button>
             </div>
           </div>
-          <!-- Base numbers for Pentatonic view -->
-          <div id="fb-penta-base" class="fb-ctrl" style="display:none;">
-            <div class="fb-ctrl-label">Relative Major/Minor</div>
-            <div class="fb-toggle-row">
-              <button class="fb-tog-btn active" id="fb-penta-btn-c" onclick="fbSetPentaKey('C')">C major</button>
-              <button class="fb-tog-btn"        id="fb-penta-btn-a" onclick="fbSetPentaKey('A')">A minor</button>
-            </div>
-          </div>
-          <!-- Numbers show (only when mode highlighted) -->
-          <div class="fb-ctrl" id="fb-num-ctrl" style="display:none;">
-            <div class="fb-ctrl-label">Numbers show</div>
-            <div class="fb-toggle-row">
-              <button class="fb-tog-btn active" id="fb-nb-mode" onclick="fbSetNumMode('mode')">Mode root = 1</button>
-              <button class="fb-tog-btn"        id="fb-nb-c"    onclick="fbSetNumMode('C')">C major</button>
-              <button class="fb-tog-btn"        id="fb-nb-a"    onclick="fbSetNumMode('A')">A minor</button>
-            </div>
+          <div style="margin-left:auto;display:flex;gap:16px;align-items:center;flex-wrap:nowrap;flex-shrink:0;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+              <div id="fb-notenames-toggle" onclick="fbToggleNoteNames()" style="
+                width:36px;height:20px;border-radius:99px;border:1px solid #3a3a3a;
+                background:#222;cursor:pointer;position:relative;transition:background 0.15s,border-color 0.15s;flex-shrink:0;">
+                <div id="fb-notenames-thumb" style="
+                  position:absolute;top:2px;left:2px;width:14px;height:14px;
+                  border-radius:50%;background:#888;transition:left 0.15s,background 0.15s;"></div>
+              </div>
+              <span id="fb-notenames-text" style="font-size:13px;color:var(--text-muted);">Note names</span>
+            </label>
+            <label id="fb-blues-row" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
+              <div id="fb-blues-toggle" onclick="fbToggleBlues()" style="
+                width:36px;height:20px;border-radius:99px;border:1px solid #3a3a3a;
+                background:#222;cursor:pointer;position:relative;transition:background 0.15s,border-color 0.15s;flex-shrink:0;">
+                <div id="fb-blues-thumb" style="
+                  position:absolute;top:2px;left:2px;width:14px;height:14px;
+                  border-radius:50%;background:#888;transition:left 0.15s,background 0.15s;"></div>
+              </div>
+              <span id="fb-blues-text" style="font-size:13px;color:var(--text-muted);">Blues scale</span>
+              <span id="fb-blues-label" style="font-size:11px;color:var(--text-dim);font-family:var(--mono);"></span>
+            </label>
           </div>
         </div>
-        <!-- Row 2: Highlight mode pills (modes view only) -->
+
+        <!-- Row 2: Context-dependent highlight controls -->
         <div id="fb-pill-row" class="fb-pill-row">
           <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Highlight mode</div>
           <div class="fb-mode-pills" id="fb-mode-pills"></div>
         </div>
-        <!-- Row 2b: Highlight shape pills (pentatonic view only) -->
+        <div class="fb-ctrl" id="fb-num-ctrl" style="display:none;margin-bottom:12px;">
+          <div class="fb-ctrl-label">Numbers show</div>
+          <div class="fb-toggle-row">
+            <button class="fb-tog-btn"        id="fb-nb-c"    onclick="fbSetNumMode('C')">Major</button>
+            <button class="fb-tog-btn"        id="fb-nb-a"    onclick="fbSetNumMode('A')">Minor</button>
+            <button class="fb-tog-btn active" id="fb-nb-mode" onclick="fbSetNumMode('mode')">Mode root = 1</button>
+          </div>
+        </div>
         <div id="fb-shape-pill-row" class="fb-pill-row" style="display:none;">
           <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Highlight shape</div>
           <div class="fb-mode-pills" id="fb-shape-pills"></div>
         </div>
-        <!-- Row 2c: Diminished scale pills (diminished view only) -->
         <div id="fb-dim-pill-row" class="fb-pill-row" style="display:none;">
           <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Diminished scale</div>
           <div class="fb-mode-pills" id="fb-dim-pills"></div>
         </div>
-        <!-- Row 2d: Harmonic minor position pills -->
         <div id="fb-harm-pill-row" class="fb-pill-row" style="display:none;">
           <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Highlight position</div>
           <div class="fb-mode-pills" id="fb-harm-pills"></div>
         </div>
-        <!-- Row 2e: Hungarian minor position pills -->
         <div id="fb-hung-pill-row" class="fb-pill-row" style="display:none;">
           <div class="fb-ctrl-label" style="width:100%; margin-bottom:2px;">Highlight position</div>
           <div class="fb-mode-pills" id="fb-hung-pills"></div>
         </div>
-        <!-- Row 2f: Diatonic chord pills (chords view only) -->
         <div id="fb-chord-pill-row" class="fb-pill-row" style="display:none;">
           <div style="display:flex; align-items:center; justify-content:space-between; width:100%; margin-bottom:6px;">
             <div class="fb-ctrl-label" style="margin-bottom:0;">Highlight chord — select one or more</div>
-            <!-- Diatonic 7ths toggle -->
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
               <div id="fb-7th-toggle" onclick="fbToggleSevenths()" style="
                 width:36px;height:20px;border-radius:99px;border:1px solid #3a3a3a;
@@ -353,43 +378,8 @@
           <div class="fb-mode-pills" id="fb-chord-pills"></div>
         </div>
 
-        <!-- Blues scale toggle (modes + pentatonic only) -->
-        <div id="fb-blues-row" class="fb-controls" style="margin-bottom:0.75rem;gap:20px;">
-          <div class="fb-ctrl" style="flex-direction:row;align-items:center;gap:10px;">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
-              <div id="fb-blues-toggle" onclick="fbToggleBlues()" style="
-                width:36px;height:20px;border-radius:99px;border:1px solid #3a3a3a;
-                background:#222;cursor:pointer;position:relative;transition:background 0.15s,border-color 0.15s;flex-shrink:0;">
-                <div id="fb-blues-thumb" style="
-                  position:absolute;top:2px;left:2px;width:14px;height:14px;
-                  border-radius:50%;background:#888;transition:left 0.15s,background 0.15s;">
-                </div>
-              </div>
-              <span id="fb-blues-text" style="font-size:13px;color:var(--text-muted);">Blues scale</span>
-              <span id="fb-blues-label" style="font-size:11px;color:var(--text-dim);font-family:var(--mono);"></span>
-            </label>
-          </div>
-        </div>
-        <!-- Note names toggle (all views) -->
-        <div id="fb-notenames-row" class="fb-controls" style="margin-bottom:0.75rem;gap:20px;">
-          <div class="fb-ctrl" style="flex-direction:row;align-items:center;gap:10px;">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;">
-              <div id="fb-notenames-toggle" onclick="fbToggleNoteNames()" style="
-                width:36px;height:20px;border-radius:99px;border:1px solid #3a3a3a;
-                background:#222;cursor:pointer;position:relative;transition:background 0.15s,border-color 0.15s;flex-shrink:0;">
-                <div id="fb-notenames-thumb" style="
-                  position:absolute;top:2px;left:2px;width:14px;height:14px;
-                  border-radius:50%;background:#888;transition:left 0.15s,background 0.15s;">
-                </div>
-              </div>
-              <span id="fb-notenames-text" style="font-size:13px;color:var(--text-muted);">Note names</span>
-            </label>
-          </div>
-        </div>
-
         <div class="fb-key-label" id="fb-key-label"><strong>C major</strong> — intervals relative to C</div>
         <div class="fb-scroll"><svg id="fb-svg" role="img"><title>Scale Map</title></svg></div>
-        <!-- Diatonic chords panel (populated by JS) -->
         <div id="fb-diatonic-panel" style="margin-top:1rem;"></div>
       </div>
     </div>

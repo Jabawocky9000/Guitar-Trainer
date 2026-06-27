@@ -10,7 +10,8 @@ import {
   fbSetView, fbSetKey, fbSetPentaKey, fbSetNumMode,
   fbRender, fbToggleBlues, fbToggleNoteNames, fbToggleSevenths,
   fbBuildPills, fbBuildShapePills, fbBuildChordPills, fbBuildDimPills,
-  fbBuildHarmPills, fbBuildHungPills, fbRenderDiatonicPanel
+  fbBuildHarmPills, fbBuildHungPills, fbRenderDiatonicPanel,
+  fbSetKeyRoot, fbSetRelMode
 } from './js/scale-map.js';
 import { cikSetMode, cikToggleSevenths, cikBuildRootBtns, cikBuild } from './js/chords-in-key.js';
 import {
@@ -50,6 +51,7 @@ Object.assign(window, {
   ssToggleDots, ssToggleRefFretboard, nnToggleFretboard,
   fbSetView, fbSetKey, fbSetPentaKey, fbSetNumMode,
   fbToggleBlues, fbToggleNoteNames, fbToggleSevenths,
+  fbSetKeyRoot, fbSetRelMode,
   cikSetMode, cikToggleSevenths,
   itSetDir, itNext, itCheck, itReveal, itToggleFretboard,
 });

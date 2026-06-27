@@ -444,6 +444,26 @@
   .fb-scroll { overflow-x: auto; }
   .fb-scroll svg { display: block; width: 100%; height: auto; min-width: 600px; }
 
+  .fb-select {
+    padding: 6px 30px 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: var(--font);
+    background: var(--bg-raised);
+    color: var(--text);
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23888' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    min-width: 120px;
+  }
+  .fb-select:focus { border-color: var(--accent-dim); outline: none; }
+  .fb-select option { background: var(--bg-raised); color: var(--text); }
+
   #cik-grid, #cik-secdom-grid, #cik-tritone-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));

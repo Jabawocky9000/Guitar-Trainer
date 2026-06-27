@@ -364,15 +364,13 @@ function cikBuildDiagram(chord, compact=true){
   }
 
   // ── Header ──
-  // Header zone runs from y=0 to TOP (HEADER + MUTE_ZONE). Place the two labels
-  // so they sit centred in that space with a clear gap between them.
   const nameFontSize  = compact ? 28 : 36;
-  const numFontSize   = compact ? 26 : 32;
-  const headerZone    = TOP;                        // total px available above fretboard
-  const totalTextH    = nameFontSize + numFontSize + (compact ? 6 : 8);  // heights + gap
-  const blockTop      = (headerZone - totalTextH) / 2;
-  const nameY         = blockTop + nameFontSize;           // baseline of chord name
-  const numeralY      = nameY + (compact ? 6 : 8) + numFontSize; // baseline of numeral
+  const numFontSize   = compact ? 16 : 20;
+  const gap           = compact ? 4 : 6;
+  const totalTextH    = nameFontSize + numFontSize + gap;
+  const blockTop      = Math.max(4, (HEADER - totalTextH) / 2);
+  const nameY         = blockTop + nameFontSize;
+  const numeralY      = nameY + gap + numFontSize;
 
   svg.appendChild(el('text',{x:W/2, y:nameY,'text-anchor':'middle','font-size':String(nameFontSize),'font-weight':'600',
     fill:'#f0f0f0','font-family':'Inter,sans-serif'}, chord.name));
@@ -425,11 +423,11 @@ function cikBuildDiagram(chord, compact=true){
     const x = LEFT + s * strGap;
     if(fret === -1){
       const sz = compact ? 5 : 7;
-      const muteY = compact ? TOP-14 : TOP-20;
+      const muteY = compact ? TOP-18 : TOP-26;
       svg.appendChild(el('line',{x1:x-sz,y1:muteY+sz,x2:x+sz,y2:muteY-sz,stroke:'#555','stroke-width':'1.5'}));
       svg.appendChild(el('line',{x1:x-sz,y1:muteY-sz,x2:x+sz,y2:muteY+sz,stroke:'#555','stroke-width':'1.5'}));
     } else if(fret === 0){
-      svg.appendChild(el('circle',{cx:x,cy:compact?TOP-13:TOP-19,r:compact?6:8,fill:'none',stroke:'#aaa','stroke-width':'1.5'}));
+      svg.appendChild(el('circle',{cx:x,cy:compact?TOP-17:TOP-25,r:compact?6:8,fill:'none',stroke:'#aaa','stroke-width':'1.5'}));
     } else {
       const coveredByBarre = chord.barre &&
         fret === chord.barre.fret &&
@@ -586,3 +584,5 @@ function cikBuildTritone(){
 }
 
 export { cikSetMode, cikToggleSevenths, cikBuildRootBtns, cikBuild };
+export { CIK_VOICING_LIB, CIK_VOICING_LIB_7, CIK_C_MAJ_OPEN, CIK_C_MAJ_OPEN_7 };
+export { CIK_PC_TO_KEY, CIK_NAMES_SHARP, CIK_NAMES_FLAT, CIK_SHARP_ROOTS_MAJ };
