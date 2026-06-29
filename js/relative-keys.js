@@ -1,7 +1,7 @@
 import { ALL_KEYS } from './data.js';
 import { shuffle, keySigLabel } from './helpers.js';
 
-let relMode='major', rScore=0, rStreak=0, rTotal=0, rCurrent=null, rAnswered=false;
+let relMode='major', rScore=0, rStreak=0, rTotal=0, rCurrent=null, rAnswered=false, rAttempts=0;
 
 function updateRelStats(){
   document.getElementById('r-score').textContent=rScore;
@@ -11,27 +11,36 @@ function updateRelStats(){
 
 function answerRel(chosen,btn,correct){
   if(rAnswered) return;
-  rAnswered=true; rTotal++;
-  document.querySelectorAll('#r-answers .ans-btn').forEach(b=>b.style.pointerEvents='none');
+  rAttempts++;
   if(chosen===correct){
+    rAnswered=true; rTotal++;
+    document.querySelectorAll('#r-answers .ans-btn').forEach(b=>b.style.pointerEvents='none');
     btn.classList.add('correct');
     document.getElementById('r-fb').textContent='✓ Correct!'; document.getElementById('r-fb').className='feedback good';
-    rScore++; rStreak++;
-  } else {
+    if(rAttempts===1){ rScore++; rStreak++; }
+    updateRelStats();
+    document.getElementById('r-prog').style.width='100%';
+    document.getElementById('r-next').style.display='block';
+    setTimeout(nextRelKey, 1000);
+  } else if(rAttempts===1){
     btn.classList.add('wrong');
-    document.querySelectorAll('#r-answers .ans-btn').forEach(b=>{if(b.textContent===correct)b.classList.add('correct');});
+    btn.style.pointerEvents='none';
+    document.getElementById('r-fb').textContent='✗ Try again!'; document.getElementById('r-fb').className='feedback bad';
+  } else {
+    rAnswered=true; rTotal++;
+    btn.classList.add('wrong');
+    document.querySelectorAll('#r-answers .ans-btn').forEach(b=>{ b.style.pointerEvents='none'; if(b.textContent===correct)b.classList.add('correct'); });
     const hint=rCurrent._askMaj?'The relative minor is the 6th degree of the major scale.':'The relative major starts a minor 3rd above the minor tonic.';
     document.getElementById('r-fb').textContent=`✗ ${correct}. ${hint}`; document.getElementById('r-fb').className='feedback bad';
     rStreak=0;
+    updateRelStats();
+    document.getElementById('r-prog').style.width='100%';
+    document.getElementById('r-next').style.display='block';
   }
-  updateRelStats();
-  document.getElementById('r-prog').style.width='100%';
-  document.getElementById('r-next').style.display='block';
-  if(chosen===correct) setTimeout(nextRelKey, 1000);
 }
 
 export function nextRelKey(){
-  rAnswered=false;
+  rAnswered=false; rAttempts=0;
   document.getElementById('r-next').style.display='none';
   document.getElementById('r-fb').textContent=''; document.getElementById('r-fb').className='feedback';
   document.getElementById('r-prog').style.width='0%';

@@ -34,6 +34,7 @@ let itCurrentRoot = null;
 let itCurrentDir = 'asc'; // actual direction for current question
 let itAnswered = false;
 let itScore = 0, itStreak = 0, itTotal = 0;
+let itAttempts = 0, itWaitForCorrection = false;
 
 function itBuildIntervalBtns(){
   const wrap = document.getElementById('it-interval-btns');
@@ -143,6 +144,8 @@ function itCheckInput(val){
 
 function itNext(){
   itAnswered = false;
+  itAttempts = 0;
+  itWaitForCorrection = false;
   itPickQuestion();
   itRenderQuestion();
   const inp = document.getElementById('it-input');
@@ -159,35 +162,65 @@ function itNext(){
 }
 
 function itCheck(){
-  if(itAnswered) return;
   const inp = document.getElementById('it-input');
   const fb  = document.getElementById('it-fb');
   if(!inp || !fb) return;
   const val = inp.value.trim();
   if(!val){ fb.textContent = 'Type a note name first.'; fb.className = 'feedback'; return; }
 
+  if(itWaitForCorrection){
+    if(itCheckInput(val)){
+      itWaitForCorrection = false;
+      itAnswered = true;
+      inp.style.borderColor = 'var(--green-border)';
+      inp.style.background  = 'var(--green-bg)';
+      inp.style.color       = 'var(--green-text)';
+      fb.textContent = '✓ Got it!';
+      fb.className   = 'feedback good';
+      setTimeout(itNext, 1000);
+    }
+    return;
+  }
+
+  if(itAnswered) return;
+
   const correct = itCheckInput(val);
-  itAnswered = true;
-  itTotal++;
+  itAttempts++;
 
   if(correct){
-    itScore++;
-    itStreak++;
+    itAnswered = true;
+    itTotal++;
+    if(itAttempts===1){ itScore++; itStreak++; }
     inp.style.borderColor = 'var(--green-border)';
     inp.style.background  = 'var(--green-bg)';
     inp.style.color       = 'var(--green-text)';
     fb.textContent = '✓ Correct!';
     fb.className   = 'feedback good';
     setTimeout(itNext, 1000);
+  } else if(itAttempts===1){
+    inp.style.borderColor = 'var(--red-border)';
+    inp.style.background  = 'var(--red-bg)';
+    inp.style.color       = 'var(--red-text)';
+    fb.textContent = '✗ Try again!';
+    fb.className   = 'feedback bad';
+    setTimeout(()=>{
+      inp.value = '';
+      inp.style.borderColor = 'var(--border-mid)';
+      inp.style.background  = 'var(--bg-raised)';
+      inp.style.color       = 'var(--text)';
+      inp.focus();
+    }, 600);
   } else {
+    itTotal++;
     itStreak = 0;
     inp.style.borderColor = 'var(--red-border)';
     inp.style.background  = 'var(--red-bg)';
     inp.style.color       = 'var(--red-text)';
     const answerPc = itGetAnswer();
     const names = IT_ENHARMONICS[answerPc].join(' / ');
-    fb.textContent = `✗  ${names}`;
+    fb.textContent = `✗  ${names} — type it to continue`;
     fb.className   = 'feedback bad';
+    itWaitForCorrection = true;
   }
   itUpdateStats();
 }

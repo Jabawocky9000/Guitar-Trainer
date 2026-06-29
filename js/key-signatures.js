@@ -3,6 +3,7 @@ import { shuffle } from './helpers.js';
 
 let ksMode='sharps', ksScore=0, ksStreak=0, ksTotal=0;
 let ksCurrent=null, ksCountDone=false, ksSelected=[];
+let ksCountAttempts=0, ksAccAttempts=0;
 
 function getKsPool() {
   return ksMode==='sharps' ? SHARP_KEYS : ksMode==='flats' ? FLAT_KEYS : [...SHARP_KEYS,...FLAT_KEYS];
@@ -38,36 +39,59 @@ function ksShowAccidentals() {
 
 function ksCheckAccidentals() {
   const correct=ksCurrent.accidentals;
-  document.querySelectorAll('#ks-acc-answers .ans-btn').forEach(b=>b.style.pointerEvents='none');
+  ksAccAttempts++;
   const ok=ksSelected.length===correct.length&&correct.every((a,i)=>ksSelected[i]===a);
-  document.querySelectorAll('#ks-acc-answers .ans-btn').forEach(b=>{
-    if(!b.textContent.includes('Submit')){
-      if(correct.includes(b.dataset.acc)) b.classList.add('correct');
-      else if(ksSelected.includes(b.dataset.acc)) b.classList.add('wrong');
-    }
-  });
-  if(ok){document.getElementById('ks-acc-fb').textContent=`✓ Perfect! ${correct.join(' → ')}`;document.getElementById('ks-acc-fb').className='feedback good';}
-  else{document.getElementById('ks-acc-fb').textContent=`Order: ${correct.join(' → ')}`;document.getElementById('ks-acc-fb').className='feedback bad';}
-  document.getElementById('ks-prog').style.width='100%';
-  document.getElementById('ks-next').style.display='block';
-  if(ok) setTimeout(nextKsKey, 1000);
+  if(ok){
+    document.querySelectorAll('#ks-acc-answers .ans-btn').forEach(b=>b.style.pointerEvents='none');
+    document.querySelectorAll('#ks-acc-answers .ans-btn').forEach(b=>{
+      if(!b.textContent.includes('Submit') && correct.includes(b.dataset.acc)) b.classList.add('correct');
+    });
+    document.getElementById('ks-acc-fb').textContent=`✓ Perfect! ${correct.join(' → ')}`;document.getElementById('ks-acc-fb').className='feedback good';
+    document.getElementById('ks-prog').style.width='100%';
+    document.getElementById('ks-next').style.display='block';
+    setTimeout(nextKsKey, 1000);
+  } else if(ksAccAttempts===1){
+    document.querySelectorAll('#ks-acc-answers .ans-btn').forEach(b=>{
+      if(!b.textContent.includes('Submit')){ b.classList.remove('selected','correct','wrong'); }
+    });
+    ksSelected=[];
+    document.getElementById('ks-acc-fb').textContent='✗ Try again!';document.getElementById('ks-acc-fb').className='feedback bad';
+  } else {
+    document.querySelectorAll('#ks-acc-answers .ans-btn').forEach(b=>b.style.pointerEvents='none');
+    document.querySelectorAll('#ks-acc-answers .ans-btn').forEach(b=>{
+      if(!b.textContent.includes('Submit')){
+        if(correct.includes(b.dataset.acc)) b.classList.add('correct');
+        else if(ksSelected.includes(b.dataset.acc)) b.classList.add('wrong');
+      }
+    });
+    document.getElementById('ks-acc-fb').textContent=`Order: ${correct.join(' → ')}`;document.getElementById('ks-acc-fb').className='feedback bad';
+    document.getElementById('ks-prog').style.width='100%';
+    document.getElementById('ks-next').style.display='block';
+  }
 }
 
 function ksAnswerCount(n, btn) {
   if(ksCountDone) return;
-  ksCountDone=true; ksTotal++;
-  document.querySelectorAll('#ks-answers .ans-btn').forEach(b=>b.style.pointerEvents='none');
+  ksCountAttempts++;
   if(n===ksCurrent.count){
+    ksCountDone=true; ksTotal++;
+    document.querySelectorAll('#ks-answers .ans-btn').forEach(b=>b.style.pointerEvents='none');
     btn.classList.add('correct');
     document.getElementById('ks-fb').textContent='✓ Correct!';
     document.getElementById('ks-fb').className='feedback good';
-    ksScore++; ksStreak++;
+    if(ksCountAttempts===1){ ksScore++; ksStreak++; }
     document.getElementById('ks-prog').style.width='50%';
     if(ksCurrent.count===0){document.getElementById('ks-next').style.display='block';document.getElementById('ks-prog').style.width='100%';setTimeout(nextKsKey,1000);}
     else setTimeout(ksShowAccidentals,600);
-  } else {
+  } else if(ksCountAttempts===1){
     btn.classList.add('wrong');
-    document.querySelectorAll('#ks-answers .ans-btn').forEach(b=>{ if((b.textContent==='0 (C)'&&ksCurrent.count===0)||(parseInt(b.textContent)===ksCurrent.count)) b.classList.add('correct'); });
+    btn.style.pointerEvents='none';
+    document.getElementById('ks-fb').textContent='✗ Try again!';
+    document.getElementById('ks-fb').className='feedback bad';
+  } else {
+    ksCountDone=true; ksTotal++;
+    btn.classList.add('wrong');
+    document.querySelectorAll('#ks-answers .ans-btn').forEach(b=>{ if((b.textContent==='0 (C)'&&ksCurrent.count===0)||(parseInt(b.textContent)===ksCurrent.count)) b.classList.add('correct'); b.style.pointerEvents='none'; });
     document.getElementById('ks-fb').textContent=`✗ It's ${ksCurrent.count}.${ksCurrent.count>0?" Let's still name them.":''}`;
     document.getElementById('ks-fb').className='feedback bad';
     ksStreak=0;
@@ -78,7 +102,7 @@ function ksAnswerCount(n, btn) {
 }
 
 export function nextKsKey() {
-  ksCountDone=false; ksSelected=[];
+  ksCountDone=false; ksSelected=[]; ksCountAttempts=0; ksAccAttempts=0;
   document.getElementById('ks-next').style.display='none';
   document.getElementById('ks-fb').textContent='';
   document.getElementById('ks-fb').className='feedback';

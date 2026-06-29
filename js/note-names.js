@@ -3,6 +3,7 @@ import { isCorrect, getEnharmonics } from './helpers.js';
 
 let currentFret = 3;
 let nnUseDots = false; // when true, restrict random frets to position dots: 0,3,5,7,9,12
+let nnAttempts = 0;
 
 function nextRandomFret(){
   if(nnUseDots){
@@ -11,6 +12,7 @@ function nextRandomFret(){
   } else {
     currentFret = Math.floor(Math.random() * 13); // 0–12 inclusive
   }
+  nnAttempts = 0;
   const fretEl = document.getElementById('fret-display');
   fretEl.textContent = currentFret === 0 ? '0' : currentFret;
   clearNotes();
@@ -58,7 +60,15 @@ function checkNotes(){
   });
   const fb=document.getElementById('note-fb');
   if(!filled){fb.textContent='Enter some notes first.';fb.className='feedback';return;}
+  nnAttempts++;
   if(ok===STRINGS.length){fb.textContent=`✓ All ${STRINGS.length} correct!`;fb.className='feedback good';setTimeout(nextRandomFret,1000);}
+  else if(nnAttempts===1){
+    fb.textContent=`${ok}/${filled} correct — try again!`;fb.className='feedback bad';
+    DISPLAY_ORDER.forEach((si, displayIdx)=>{
+      const inp=document.getElementById(`ni-${displayIdx}`);
+      if(inp.classList.contains('wrong')){ inp.value=''; inp.className='note-inp'; inp.focus(); }
+    });
+  }
   else{fb.textContent=`${ok}/${filled} correct`;fb.className='feedback bad';}
 }
 
@@ -153,6 +163,8 @@ let ssDotsOnly       = false;
 let ssCurrentString  = 0;   // index into SS_STRINGS
 let ssCurrentFret    = 0;
 let ssAnswered       = false;
+let ssAttempts       = 0;
+let ssWaitForCorrection = false;
 
 function ssInit(){
   ssInitialised = true;
@@ -235,6 +247,8 @@ function ssPickQuestion(){
 
 function ssNext(){
   ssAnswered = false;
+  ssAttempts = 0;
+  ssWaitForCorrection = false;
   ssPickQuestion();
   // Reset input
   const inp = document.getElementById('ss-input');
@@ -252,32 +266,64 @@ function ssNext(){
 }
 
 function ssCheck(){
-  if(ssAnswered) return;
   const inp = document.getElementById('ss-input');
   const fb  = document.getElementById('ss-fb');
   if(!inp || !fb) return;
   const val = inp.value.trim();
   if(!val){ fb.textContent = 'Type a note name first.'; fb.className = 'feedback'; return; }
 
+  if(ssWaitForCorrection){
+    const s = SS_STRINGS[ssCurrentString];
+    if(isCorrect(val, s.midi, ssCurrentFret)){
+      ssWaitForCorrection = false;
+      ssAnswered = true;
+      inp.style.borderColor = 'var(--green-border)';
+      inp.style.background  = 'var(--green-bg)';
+      inp.style.color       = 'var(--green-text)';
+      fb.textContent = '✓ Got it!';
+      fb.className   = 'feedback good';
+      setTimeout(ssNext, 1000);
+    }
+    return;
+  }
+
+  if(ssAnswered) return;
+
   const s = SS_STRINGS[ssCurrentString];
   const correct = isCorrect(val, s.midi, ssCurrentFret);
-  ssAnswered = true;
+  ssAttempts++;
 
   if(correct){
+    ssAnswered = true;
     inp.style.borderColor = 'var(--green-border)';
     inp.style.background  = 'var(--green-bg)';
     inp.style.color       = 'var(--green-text)';
     fb.textContent = '✓ Correct!';
     fb.className   = 'feedback good';
-    setTimeout(ssNext, 1000);
+    if(ssAttempts <= 2) setTimeout(ssNext, 1000);
+  } else if(ssAttempts===1){
+    inp.style.borderColor = 'var(--red-border)';
+    inp.style.background  = 'var(--red-bg)';
+    inp.style.color       = 'var(--red-text)';
+    fb.textContent = '✗ Try again!';
+    fb.className   = 'feedback bad';
+    setTimeout(()=>{
+      inp.value = '';
+      inp.style.borderColor = 'var(--border-mid)';
+      inp.style.background  = 'var(--bg-raised)';
+      inp.style.color       = 'var(--text)';
+      inp.focus();
+    }, 600);
   } else {
+    ssAnswered = false;
     inp.style.borderColor = 'var(--red-border)';
     inp.style.background  = 'var(--red-bg)';
     inp.style.color       = 'var(--red-text)';
     const enhs = getEnharmonics(s.midi, ssCurrentFret);
-    fb.textContent = `✗  ${enhs.join(' / ')}`;
+    fb.textContent = `✗  ${enhs.join(' / ')} — type it to continue`;
     fb.className   = 'feedback bad';
     ssRenderFretboard(true);
+    ssWaitForCorrection = true;
   }
 }
 
